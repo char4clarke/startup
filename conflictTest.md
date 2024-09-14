@@ -1,1 +1,1 @@
-some text
+This is a test for git conflict resolution
