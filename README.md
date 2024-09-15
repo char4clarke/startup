@@ -11,16 +11,16 @@ Below are rough sketches of the application's user interface:
 1. **Dashboard**
    - Overview of daily/weekly/monthly time distribution.
    - Graphs and charts for activity analysis.
-![Dashboard](link-to-your-mockup-image)
+![Dashboard](/Users/charlesclarke/Desktop/CS260/startup/assets/Dashboard-mockup.jpg)
 
 2. **Activity Log**
    - Section for manual time entry and editing.
    - Real-time updates for tracked activities.
-![Activity Log](link-to-your-mockup-image)
+![Activity Log](/Users/charlesclarke/Desktop/CS260/startup/assets/ActivityLog-mockup.jpg)
 
 3. **Insights Page**
    - Detailed analytics and user-specific recommendations.
-![Insights Page](link-to-your-mockup-image)
+![Insights Page](/Users/charlesclarke/Desktop/CS260/startup/assets/InsightsPage-mockup.jpg)
 
 
 ## Key Features
