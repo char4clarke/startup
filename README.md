@@ -37,7 +37,10 @@ Below are rough sketches of the application's user interface:
 
 ## Technologies
 ### HTML
-- **Structure**: Basic structural elements for the various pages such as dashboard, activity log, and analytical insights.
+- **HTML Pages**: I added 4 html pages, one for login, dashboard, activity log, and insights.
+- **Links**: Added links at the top to nagigate between the different pages.
+- **Login/DB**: Index page is a login with an input box and login button, will then pull the user's data from database.
+- **Websocket/Charts**: The user's individualized data and info will update the charts and visualizations in the dashboard, activity log, and insights page in real time.
 
 ### CSS
 - **Styling**: Clean, simple design ensuring a good user experience across different screen sizes. Use of color schemes, whitespace, and animations to enhance visual appeal.
