@@ -39,8 +39,9 @@ Below are rough sketches of the application's user interface:
 ### HTML
 - **HTML Pages**: I added 4 html pages, one for login, dashboard, activity log, and insights. (once I have the login implementation for authenticating users, I will have the login index.html page automatically link to the dashboard)
 - **Links**: Added links at the top to nagigate between the different pages.
-- **Login/DB**: Index page is a login with an input box and login button, will then pull the user's data from database.
-- **Websocket/Charts**: The user's individualized data and info will update the charts and visualizations in the dashboard, activity log, and insights page in real time.
+- **Login/DB Placeholder**: Index page is a login with an input box and login button, will then pull the user's data from database.
+- **Websocket/Charts Placeholder**: The user's individualized data and info will update the charts and visualizations in the dashboard, activity log, and insights page in real time.
+- **App Text/Content**: Text on the dashboard, activity log, and insights page to describe the activities and their data from the websocket and database.
 
 ### CSS
 - **Styling**: Clean, simple design ensuring a good user experience across different screen sizes. Use of color schemes, whitespace, and animations to enhance visual appeal.
