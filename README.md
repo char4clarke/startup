@@ -36,7 +36,7 @@ Below are rough sketches of the application's user interface:
 
 
 ## Technologies
-### HTML
+### HTML [x]
 - **HTML Pages**: I added 4 html pages, one for login, dashboard, activity log, and insights. (once I have the login implementation for authenticating users, I will have the login index.html page automatically link to the dashboard)
 - **Links**: Added links at the top to nagigate between the different pages.
 - **Login/DB Placeholder**: Index page is a login with an input box and login button, will then pull the user's data from database.
@@ -44,7 +44,7 @@ Below are rough sketches of the application's user interface:
 - **App Text/Content**: Text on the dashboard, activity log, and insights page to describe the activities and their data from the websocket and database. Buttons to log each of the specified activites, including creating a new activity to be tracked. 
 - **Third-Party Service/API Calls**: API calls will be used for user authentication, and fetching user specific data from other apps like google calendar.
 
-### CSS
+### CSS [x]
 - **Header, Footer**: Implemented a clean design for the header and footer that remains consistent across all pages of the app.
 - **Main Content Body**: Stylized each page individually with how the final version of the app will look.
 - **Navigation Elements**: I added buttons with mouse hover implementation. The navigation menu also appears the same across all pages of the app, but the page currenly being viewed is highlighted in the menu.
