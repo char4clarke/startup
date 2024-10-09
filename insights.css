@@ -44,6 +44,10 @@ nav menu li a {
 nav menu li a:hover {
     background-color: #45a049;
 }
+nav menu li a.active {
+    background-color: #45a049; /* Active link background color */
+    color: white; /* Active link text color */
+}
 
 
 

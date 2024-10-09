@@ -45,7 +45,14 @@ Below are rough sketches of the application's user interface:
 - **Third-Party Service/API Calls**: API calls will be used for user authentication, and fetching user specific data from other apps like google calendar.
 
 ### CSS
-- **Styling**: Clean, simple design ensuring a good user experience across different screen sizes. Use of color schemes, whitespace, and animations to enhance visual appeal.
+- **Header, Footer**: Implemented a clean design for the header and footer that remains consistent across all pages of the app.
+- **Main Content Body**: Stylized each page individually with how the final version of the app will look.
+- **Navigation Elements**: I added buttons with mouse hover implementation. The navigation menu also appears the same across all pages of the app, but the page currenly being viewed is highlighted in the menu.
+- **Responsive to Window Resizing**: Added flex functionality so the elements of each page resize to look clean across any size of browser window.
+- **Application Elements**: Elements are neatly spaced across the pages of the app with effective use of whitespace to clearly organize all application elements.
+- **Application Text Content**: Text fonts are the same, and each page has a consistent color and spacing theme.
+- **Application Images**: Clock icon at the top of each page to appear as a logo. The pie chart image on the dashboard page has flex resizing functionality so it stays centered and fits in any size window.
+
 
 ### JavaScript/React
 - **Interactivity**: Handling user interactions like activity logging, data visualization updates, and real-time analytics display.
