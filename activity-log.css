@@ -1,9 +1,12 @@
-body {
+html, body {
+    height: 100%;
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     background-color: white;
     color: black;
+    display: flex;
+    flex-direction:column;
 }
 
 
@@ -43,6 +46,9 @@ nav menu li a:hover {
 
 
 
+main {
+    flex-grow: 1;
+}
 
 
 

@@ -1,9 +1,12 @@
-body {
+html, body {
+    height: 100%;
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     background-color: white;
     color: black;
+    display: flex;
+    flex-direction:column;
 }
 
 
@@ -50,6 +53,7 @@ main {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center; 
+    flex-grow: 1;
 }
 h2 {
     color: #4CAF50;
