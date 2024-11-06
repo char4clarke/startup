@@ -1,6 +1,10 @@
 import React from 'react';
 import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
 import './App.css';
+import Login from './login/Login';
+import Dashboard from './dashboard/Dashboard';
+import ActivityLog from './activityLog/ActivityLog';
+import Insights from './insights/Insights';
 
 function App() {
   return (
@@ -44,27 +48,7 @@ function App() {
   );
 }
 
-function Login() {
-  return (
-    <main>
-      <h2>Welcome!</h2>
-      <p>Please log in to access your dashboard and track your activities.</p>
 
-      <div>
-        <h3>Login</h3>
-        <form action="dashboard.html" method="post">
-          <label htmlFor="username">Username:</label>
-          <input type="text" id="username" name="username" required />
-          <br />
-          <label htmlFor="password">Password:</label>
-          <input type="password" id="password" name="password" required />
-          <br />
-          <button type="submit">Login</button>
-        </form>
-      </div>
-    </main>
-  );
-}
 
 function Dashboard() {
   return <main><h2>Dashboard</h2></main>;
