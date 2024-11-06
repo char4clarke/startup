@@ -49,21 +49,4 @@ function App() {
 }
 
 
-
-function Dashboard() {
-  return <main><h2>Dashboard</h2></main>;
-}
-
-function ActivityLog() {
-  return <main><h2>Activity Log</h2></main>;
-}
-
-function Insights() {
-  return <main><h2>Insights</h2></main>;
-}
-
-function NotFound() {
-  return <main className='container-fluid bg-secondary text-center'>404: Return to sender. Address unknown.</main>;
-}
-
 export default App;
