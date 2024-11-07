@@ -1,74 +1,53 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import './dashboard.css';
+import React, { useState } from 'react';
+import './Dashboard.css'; // Assuming you'll create a separate CSS file for Dashboard
 
 function Dashboard() {
+  const [timeframe, setTimeframe] = useState('Today');
+  const [activities, setActivities] = useState([
+    { name: 'Studying', duration: '2 hours' },
+    { name: 'Working Out', duration: '1 hour' },
+    { name: 'Entertainment', duration: '1.5 hours' },
+    { name: 'Social Media', duration: '30 minutes' }
+  ]);
+
+  const handleTimeframeChange = (newTimeframe) => {
+    setTimeframe(newTimeframe);
+    // Here you would typically fetch or update data based on the selected timeframe
+  };
+
   return (
-    <div>
-      {/* Header */}
-      <header>
-        <div className="header-content">
-          <img 
-            src="https://openclipart.org/image/800px/173843" 
-            alt="Simple Clock" 
-            style={{ width: '50px', height: 'auto', marginRight: '15px' }}
-          />
-          <h1>Time Tracker</h1>
-        </div>
-        <hr />
-        
-        {/* Navigation */}
-        <nav>
-          <ul>
-            <li><Link to="/">Login</Link></li>
-            <li><Link to="/dashboard" className="active">Dashboard</Link></li>
-            <li><Link to="/activity-log">Activity Log</Link></li>
-            <li><Link to="/insights">Insights</Link></li>
-          </ul>
-        </nav>
-        <hr />
-      </header>
+    <main>
+      <h2>Dashboard</h2>
+      
+      <div>
+        {['Today', 'This Week', 'This Month'].map((tf) => (
+          <button 
+            key={tf} 
+            onClick={() => handleTimeframeChange(tf)}
+            className={timeframe === tf ? 'active' : ''}
+          >
+            {tf}
+          </button>
+        ))}
+      </div>
+      
+      <div>
+        <h3>Time Spent Breakdown</h3>
+        <div style={{width: '10px', height: '10px', textAlign: 'center'}}></div>
+        <img 
+          src="https://www.jaspersoft.com/content/dam/jaspersoft/images/graphics/infographics/pie-chart-example.svg" 
+          alt="Time Spent Breakdown Pie Chart (PLACEHOLDER)" 
+          style={{width: '50%', height: '50%', objectFit: 'contain'}}
+        />
+      </div>
 
-      {/* Main Content */}
-      <main>
-        <h2>Dashboard</h2>
-        
-        {/* Timeframe selection buttons */}
-        <div>
-          <button>Today</button>
-          <button>This Week</button>
-          <button>This Month</button>
-        </div>
-        
-        {/* Placeholder for pie chart */}
-        <div>
-          <h3>Time Spent Breakdown</h3>
-          <div style={{ width: '10px', height: '10px', textAlign: 'center' }}></div>
-          <img 
-            src="https://www.jaspersoft.com/content/dam/jaspersoft/images/graphics/infographics/pie-chart-example.svg" 
-            alt="Time Spent Breakdown Pie Chart (PLACEHOLDER)" 
-            style={{ width: '50%', height: '50%', objectFit: 'contain' }}
-          />
-        </div>
-  
-        {/* List of activities */}
-        <h3>Activity List</h3>
-        <ul>
-          <li>Studying: 2 hours</li>
-          <li>Working Out: 1 hour</li>
-          <li>Entertainment: 1.5 hours</li>
-          <li>Social Media: 30 minutes</li>
-        </ul>
-      </main>
-
-      {/* Footer */}
-      <footer>
-        <hr />
-        <span className="text-reset">Charles Clarke</span>
-        <br />
-        <a href="https://github.com/char4clarke/startup">GitHub</a>
-      </footer>
-    </div>
+      <h3>Activity List</h3>
+      <ul>
+        {activities.map((activity, index) => (
+          <li key={index}>{activity.name}: {activity.duration}</li>
+        ))}
+      </ul>
+    </main>
   );
 }
 
