@@ -53,9 +53,15 @@ Below are rough sketches of the application's user interface:
 - **Application Text Content**: Text fonts are the same, and each page has a consistent color and spacing theme.
 - **Application Images**: Clock icon at the top of each page to appear as a logo. The pie chart image on the dashboard page has flex resizing functionality so it stays centered and fits in any size window.
 
-
-### JavaScript/React
-- **Interactivity**: Handling user interactions like activity logging, data visualization updates, and real-time analytics display.
+### React ✅
+- **Bundled/Transpiled**: Bundled using Vite.
+- **React Components**: Added components for login, dashboard, activity log, and insights.
+   - **Login**: Handles use login functionality.
+   - **Dashboard**: Displays user activity and time tracking data.
+   - **Activity Log**: Shows a detailed log of user activities.
+   - **Insights**: Provides detailed visual insights into time spent.
+- **Routing**: I implemented react router to manage navigation between different pages of the app.
+- **Hooks**: I used hooks like useState and useEffect to manage state and side effects within components.
 
 ### Service
 - **Backend Service**: Endpoints for:
