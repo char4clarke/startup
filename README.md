@@ -1,4 +1,4 @@
-# startup
+# Startup
 
 # TimeTracker
 
