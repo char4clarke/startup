@@ -21,6 +21,12 @@ header {
     align-items: center;
     justify-content: center;
 }
+.header-top {
+    display: flex;
+    justify-content: space-between; /* Space between Time Tracker and Logout */
+    align-items: center; /* Vertically center items */
+    padding: 0 20px; /* Add padding for spacing */
+}
 
 
 nav menu {
@@ -46,6 +52,24 @@ nav menu li a:hover {
 nav menu li a.active {
     background-color: #45a049; /* Active link background color */
     color: white; /* Active link text color */
+}
+.logout-container {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+.btn-outline-light {
+    color: white;
+    border: 2px solid white;
+    background-color: transparent;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+    color: #4CAF50;
+    background-color: white;
 }
 
 

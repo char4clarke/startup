@@ -57,6 +57,9 @@ main {
     max-width: 800px;
     margin: 0 auto;
     background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 h2 {
     color: #4CAF50;
@@ -92,7 +95,16 @@ ul {
     border: 1px solid #ddd; /* Light border for distinction */
     border-radius: 10px; /* Rounded corners */
 }
-
+.graph-container {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.graph-container > * {
+    max-width: 100%;
+}
 ul li {
     margin: 10px 0;
     font-size: 1.2em; /* Increased font size for readability */
