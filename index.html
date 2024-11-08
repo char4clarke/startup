@@ -1,57 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-        <link rel="icon" href="charlesclarke.click/favicon.ico" />
-        <title>Time Tracker - Home</title>
-        <link rel="stylesheet" href="index.css">
-    </head> 
-
-    <body>
-        <header>
-            <div class="header-content">
-                <img src="https://openclipart.org/image/800px/173843" 
-                     alt="Simple Clock" 
-                     style="width: 50px; height: auto; margin-right: 15px;">
-                     <h1>Time Tracker</h1>
-            </div>
-            <hr />
-            <nav>
-                <menu>
-                    <li><a href="index.html" class="active">Login</a></li>
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="activity-log.html">Activity Log</a></li>
-                    <li><a href="insights.html">Insights</a></li>
-                </menu>
-            </nav>
-            <hr />
-        </header>
-        
-
-        <main>
-            <h2>Welcome!</h2>
-            <p>Please log in to access your dashboard and track your activities.</p>
-
-            <div>
-                <h3>Login</h3>
-                <form action="dashboard.html" method="post">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" required />
-                    <br />
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required />
-                    <br />
-                    <button type="submit">Login</button>
-                </form>
-            </div>
-        </main>
-
-        <footer>
-            <hr />
-            <span class="text-reset">Charles Clarke</span>
-            <br />
-            <a href="https://github.com/char4clarke/startup">GitHub</a>
-        </footer>
-    </body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>Time Tracker</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.jsx"></script>
+  </body>
 </html>
