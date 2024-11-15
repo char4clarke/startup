@@ -6,15 +6,14 @@ const port = process.argv.length > 2 ? process.argv[2] : 4000;
 app.use(express.json());
 
 let users = {}; // In-memory user storage
+let activities = []; // In-memory storage for activities
 
 // Register a new user
 app.post('/api/auth/register', (req, res) => {
-  console.log('Registering user:', req.body);
   const { email, password } = req.body;
-
+  
   // Check if the user already exists
   if (users[email]) {
-    console.log('User already exists:', email);
     return res.status(409).json({ msg: 'User already exists' });
   }
 
@@ -56,23 +55,43 @@ app.delete('/api/auth/logout', (req, res) => {
   return res.status(400).json({ msg: 'Invalid token' });
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// Endpoint to store activity data
+app.post('/api/activities', (req, res) => {
+  const { userId, activity, duration } = req.body;
+
+  // Validate input
+  if (!userId || !activity || !duration) {
+    return res.status(400).json({ msg: 'Missing required fields' });
+  }
+
+  const newActivity = {
+    id: uuid.v4(),
+    userId,
+    activity,
+    duration,
+    date: new Date().toISOString(),
+  };
+
+  activities.push(newActivity);
+  console.log('Activity logged:', newActivity);
+  
+  res.status(201).json(newActivity);
 });
 
-// Register a new user
-app.post('/api/auth/register', (req, res) => {
-    const { email, password } = req.body;
+// Endpoint to retrieve all activities for a specific user
+app.get('/api/activities/:userId', (req, res) => {
+  const { userId } = req.params;
   
-    // Check if user already exists
-    if (users[email]) {
-      return res.status(409).json({ msg: 'User already exists' });
-    }
+  const userActivities = activities.filter(activity => activity.userId === userId);
   
-    // Create new user with a token
-    const user = { email, password, token: uuid.v4() };
-    users[email] = user;
+  if (!userActivities.length) {
+    return res.status(404).json({ msg: 'No activities found for this user' });
+  }
   
-    res.status(201).json({ token: user.token });
+  res.status(200).json(userActivities);
+});
+
+// Start the server (only call this once)
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });

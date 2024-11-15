@@ -1,28 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ActivityLog.css'; // Assuming you'll create a separate CSS file for ActivityLog
 
 function ActivityLog() {
   const [timeframe, setTimeframe] = useState('Today');
-  const [activities, setActivities] = useState([
-    { name: 'Studying', duration: '2 hours' },
-    { name: 'Working Out', duration: '1 hour' },
-    { name: 'Entertainment', duration: '1.5 hours' },
-    { name: 'Social Media', duration: '30 minutes' }
-  ]);
+  const [activities, setActivities] = useState([]); // Initialize as empty array
+  const [message, setMessage] = useState(''); // For success/error messages
 
-  const handleStartLogging = (activity) => {
-    // Implement logging logic here
-    console.log(`Started logging ${activity}`);
+  // Fetch activities from the backend when the component mounts
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const userId = '123'; // Replace this with actual user ID from auth context or localStorage
+        const response = await fetch(`/api/activities/${userId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setActivities(data); // Set fetched activities in state
+        } else {
+          console.error('Failed to fetch activities');
+          setMessage('Failed to fetch activities.');
+        }
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+        setMessage('An error occurred while fetching activities.');
+      }
+    };
+
+    fetchActivities();
+  }, []); // Empty dependency array means this runs once when the component mounts
+
+  // Handle starting an activity log for predefined activities
+  const handleStartLogging = async (activityName) => {
+    try {
+      const userId = '123'; // Replace with actual user ID from auth context or localStorage
+      const duration = prompt(`Enter duration for ${activityName} in minutes:`); // Prompt for duration
+
+      if (!duration) return; // If no duration is entered, exit function
+
+      const response = await fetch('/api/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          activity: activityName,
+          duration,
+        }),
+      });
+
+      if (response.ok) {
+        const newActivity = await response.json();
+        setActivities([...activities, newActivity]); // Add new activity to state
+        setMessage('Activity logged successfully!');
+      } else {
+        setMessage('Failed to log activity.');
+      }
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      setMessage('An error occurred while logging activity.');
+    }
   };
 
+  // Handle logging a custom "New" activity
+  const handleNewActivityLogging = async () => {
+    try {
+      const userId = '123'; // Replace with actual user ID from auth context or localStorage
+      
+      // Prompt for custom activity name and duration
+      const activityName = prompt("Enter the name of the new activity:");
+      if (!activityName) return; // Exit if no activity name is entered
+
+      const duration = prompt(`Enter duration for ${activityName} in minutes:`);
+      if (!duration) return; // Exit if no duration is entered
+
+      const response = await fetch('/api/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          activity: activityName,
+          duration,
+        }),
+      });
+
+      if (response.ok) {
+        const newActivity = await response.json();
+        setActivities([...activities, newActivity]); // Add new custom activity to state
+        setMessage('Custom activity logged successfully!');
+      } else {
+        setMessage('Failed to log custom activity.');
+      }
+    } catch (error) {
+      console.error('Error logging custom activity:', error);
+      setMessage('An error occurred while logging custom activity.');
+    }
+  };
+
+  // Handle timeframe change (you can implement filtering logic here)
   const handleTimeframeChange = (newTimeframe) => {
     setTimeframe(newTimeframe);
     // Here you would typically fetch or update data based on the selected timeframe
-  };
-
-  const handleEdit = (index) => {
-    // Implement editing logic here
-    console.log(`Editing activity at index ${index}`);
   };
 
   return (
@@ -31,28 +107,29 @@ function ActivityLog() {
 
       <div>
         <h3>Start Logging:</h3>
-        {['Studying', 'Working Out', 'Entertainment', 'Social Media', 'New'].map((activity) => (
+        
+        {/* Predefined Activity Buttons */}
+        {['Studying', 'Working Out', 'Entertainment', 'Social Media'].map((activity) => (
           <button key={activity} className="activity-btn" onClick={() => handleStartLogging(activity)}>
             {activity}
           </button>
         ))}
+
+        {/* New Activity Button */}
+        <button className="activity-btn" onClick={handleNewActivityLogging}>
+          New Activity
+        </button>
       </div>
-      
-      <div>
-        <h3>Select Timeframe:</h3>
-        {['Today', 'This Week', 'This Month'].map((tf) => (
-          <button key={tf} onClick={() => handleTimeframeChange(tf)} className={timeframe === tf ? 'active' : ''}>
-            {tf}
-          </button>
-        ))}
-      </div>
-      
+
       <div>
         <h3>Logged Activities</h3>
+        {message && <p>{message}</p>} {/* Display success/error message */}
+        
+        {/* Display Logged Activities */}
         <ul>
           {activities.map((activity, index) => (
             <li key={index}>
-              {activity.name}: {activity.duration} <button onClick={() => handleEdit(index)}>Edit</button>
+              {activity.activity}: {activity.duration} minutes on {new Date(activity.date).toLocaleDateString()}
             </li>
           ))}
         </ul>
