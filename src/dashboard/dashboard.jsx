@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Pie } from 'react-chartjs-2'; // Import Pie chart component from react-chartjs-2
-import { Chart, ArcElement, Tooltip, Legend } from 'chart.js'; // Import required Chart.js components
-import './Dashboard.css'; // Assuming you'll create a separate CSS file for Dashboard
+import { Pie } from 'react-chartjs-2';
+import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
+import './Dashboard.css';
 
-// Register the required components
 Chart.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
   const [timeframe, setTimeframe] = useState('Today');
-  const [activities, setActivities] = useState([]); // Initialize as empty array
-  const [message, setMessage] = useState(''); // For success/error messages
-  
-  // State for random quote data
+  const [activities, setActivities] = useState([]);
+  const [message, setMessage] = useState('');
   const [quote, setQuote] = useState('');
   const [author, setAuthor] = useState('');
 
-  // Fetch random quote from third-party API when component mounts
   useEffect(() => {
     const fetchQuote = async () => {
       try {
@@ -26,26 +22,23 @@ function Dashboard() {
         setAuthor(data.author);
       } catch (error) {
         console.error('Error fetching quote:', error);
-        setQuote('Life is what happens when you’re busy making other plans.'); // Default quote
-        setAuthor('John Lennon'); // Default author
+        setQuote('Life is what happens when you\'re busy making other plans.');
+        setAuthor('John Lennon');
       }
     };
-  
-    // Fetch new quote and activities when the timeframe changes
+
     fetchQuote();
     fetchActivities();
-  }, [timeframe]); // Add timeframe to the dependency array
-  
+  }, []);
 
-  // Fetch activities from the backend when the component mounts or when timeframe changes
   const fetchActivities = async () => {
     try {
       const userId = '123'; // Replace this with actual user ID from auth context or localStorage
-      const response = await fetch(`/api/activities/${userId}`); // Fetch all activities
+      const response = await fetch(`/api/activities/${userId}`);
       
       if (response.ok) {
         const data = await response.json();
-        setActivities(data); // Set fetched activities in state
+        setActivities(data);
       } else {
         console.error('Failed to fetch activities');
         setMessage('Failed to fetch activities.');
@@ -56,79 +49,63 @@ function Dashboard() {
     }
   };
 
-  // Handle timeframe change and filter activities based on last X days
-  const filterActivitiesByTimeframe = (timeframe) => {
+  const filterActivitiesByTimeframe = (activities, timeframe) => {
     const today = new Date();
-    let filteredActivities = [];
+    today.setHours(0, 0, 0, 0); // Set to start of day
 
-    if (timeframe === 'Today') {
-      filteredActivities = activities.filter(activity => {
-        const activityDate = new Date(activity.date);
-        return activityDate.toDateString() === today.toDateString();
-      });
-    } else if (timeframe === 'This Week') {
-      const pastWeek = new Date(today.setDate(today.getDate() - 7)); // Last 7 days
-      filteredActivities = activities.filter(activity => {
-        const activityDate = new Date(activity.date);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    return activities.filter(activity => {
+      const activityDate = new Date(activity.date);
+      activityDate.setHours(0, 0, 0, 0); // Set to start of day
+
+      if (timeframe === 'Today') {
+        return activityDate.getTime() === yesterday.getTime();
+      } else if (timeframe === 'This Week') {
+        const pastWeek = new Date(today);
+        pastWeek.setDate(pastWeek.getDate() - 7);
         return activityDate >= pastWeek;
-      });
-    } else if (timeframe === 'This Month') {
-      const pastMonth = new Date(today.setDate(today.getDate() - 30)); // Last 30 days
-      filteredActivities = activities.filter(activity => {
-        const activityDate = new Date(activity.date);
+      } else if (timeframe === 'This Month') {
+        const pastMonth = new Date(today);
+        pastMonth.setMonth(pastMonth.getMonth() - 1);
         return activityDate >= pastMonth;
-      });
-    }
-
-    return filteredActivities;
+      }
+      return true;
+    });
   };
 
-  // Update handleTimeframeChange function
   const handleTimeframeChange = (newTimeframe) => {
-    const filteredActivities = filterActivitiesByTimeframe(newTimeframe);
-    setActivities(filteredActivities);
-    setTimeframe(newTimeframe); // Ensure timeframe updates even if activities are the same
-};
-  
+    setTimeframe(newTimeframe);
+  };
 
-  // Calculate total time spent per activity
-  const calculateTotalTimePerActivity = () => {
+  const calculateTotalTimePerActivity = (filteredActivities) => {
     const totals = {};
 
-    activities.forEach((activity) => {
+    filteredActivities.forEach((activity) => {
       if (!totals[activity.activity]) {
         totals[activity.activity] = 0;
       }
-      totals[activity.activity] += parseFloat(activity.duration); // Sum durations
+      totals[activity.activity] += parseFloat(activity.duration);
     });
 
     return totals;
   };
 
-  const totalTimes = calculateTotalTimePerActivity();
+  const filteredActivities = filterActivitiesByTimeframe(activities, timeframe);
+  const totalTimes = calculateTotalTimePerActivity(filteredActivities);
 
-  // Prepare data for the Pie chart
   const pieChartData = {
-    labels: Object.keys(totalTimes), // Activity names
+    labels: Object.keys(totalTimes),
     datasets: [
       {
         label: 'Time Spent (minutes)',
-        data: Object.values(totalTimes), // Total time per activity
+        data: Object.values(totalTimes),
         backgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56',
-          '#4BC0C0',
-          '#9966FF',
-          '#FF9F40'
+          '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
         ],
         hoverBackgroundColor: [
-          '#FF6384',
-          '#36A2EB',
-          '#FFCE56',
-          '#4BC0C0',
-          '#9966FF',
-          '#FF9F40'
+          '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
         ]
       }
     ]
@@ -144,7 +121,6 @@ function Dashboard() {
       </div>
       
       <div>
-        {/* Timeframe Buttons */}
         {['Today', 'This Week', 'This Month'].map((tf) => (
           <button 
             key={tf} 
@@ -158,17 +134,14 @@ function Dashboard() {
 
       <div>
         <h3>Time Spent Breakdown</h3>
-        
-        {/* Pie Chart */}
         <div style={{ width: '100%', margin: '0 auto' }}>
           <Pie key={timeframe} data={pieChartData} />
         </div>
       </div>
 
       <h3>Activity List</h3>
-      {message && <p>{message}</p>} {/* Display success/error message */}
+      {message && <p>{message}</p>}
       
-      {/* Display Total Time Spent Per Activity */}
       <ul>
         {Object.keys(totalTimes).map((activityName, index) => (
           <li key={index}>
