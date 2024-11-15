@@ -63,12 +63,12 @@ Below are rough sketches of the application's user interface:
 - **Routing**: I implemented react router to manage navigation between different pages of the app.
 - **Hooks**: I used hooks like useState and useEffect to manage state and side effects within components.
 
-### Service
+### Service ✅
 - **Backend Service**: Endpoints for:
   - **Login**: Registering, logging in, and managing user accounts.
   - **Activity Data**: Storing and retrieving time logs and activity details.
   - **Analytics**: Analytics data for visualization.
-  - **Third-Party API**: Integration with an external API for additional data, such as location-based information.
+  - **Third-Party API**: Integration with a third-party API to grab random quotes displayed on the dashboard page.
 
 ### Authentication
 - **Login/Signup**: Secure login system allowing users to create accounts and manage their profiles.
