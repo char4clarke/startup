@@ -10,29 +10,51 @@ function Dashboard() {
   const [timeframe, setTimeframe] = useState('Today');
   const [activities, setActivities] = useState([]); // Initialize as empty array
   const [message, setMessage] = useState(''); // For success/error messages
+  
+  // State for random quote data
+  const [quote, setQuote] = useState('');
+  const [author, setAuthor] = useState('');
 
-  // Fetch activities from the backend when the component mounts or when timeframe changes
+  // Fetch random quote from third-party API when component mounts
   useEffect(() => {
-    const fetchActivities = async () => {
+    const fetchQuote = async () => {
       try {
-        const userId = '123'; // Replace this with actual user ID from auth context or localStorage
-        const response = await fetch(`/api/activities/${userId}`); // Fetch all activities
-        
-        if (response.ok) {
-          const data = await response.json();
-          setActivities(data); // Set fetched activities in state
-        } else {
-          console.error('Failed to fetch activities');
-          setMessage('Failed to fetch activities.');
-        }
+        const response = await fetch('https://api.quotable.io/random');
+        if (!response.ok) throw new Error('Failed to fetch quote');
+        const data = await response.json();
+        setQuote(data.content);
+        setAuthor(data.author);
       } catch (error) {
-        console.error('Error fetching activities:', error);
-        setMessage('An error occurred while fetching activities.');
+        console.error('Error fetching quote:', error);
+        setQuote('Life is what happens when you’re busy making other plans.'); // Default quote
+        setAuthor('John Lennon'); // Default author
       }
     };
-
+  
+    // Fetch new quote and activities when the timeframe changes
+    fetchQuote();
     fetchActivities();
-  }, [timeframe]); // Re-fetch when timeframe changes
+  }, [timeframe]); // Add timeframe to the dependency array
+  
+
+  // Fetch activities from the backend when the component mounts or when timeframe changes
+  const fetchActivities = async () => {
+    try {
+      const userId = '123'; // Replace this with actual user ID from auth context or localStorage
+      const response = await fetch(`/api/activities/${userId}`); // Fetch all activities
+      
+      if (response.ok) {
+        const data = await response.json();
+        setActivities(data); // Set fetched activities in state
+      } else {
+        console.error('Failed to fetch activities');
+        setMessage('Failed to fetch activities.');
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setMessage('An error occurred while fetching activities.');
+    }
+  };
 
   // Handle timeframe change and filter activities based on last X days
   const filterActivitiesByTimeframe = (timeframe) => {
@@ -65,8 +87,8 @@ function Dashboard() {
   const handleTimeframeChange = (newTimeframe) => {
     setTimeframe(newTimeframe);
     const filteredActivities = filterActivitiesByTimeframe(newTimeframe);
-    setActivities(filteredActivities); // Update activities state with filtered results
-  };
+    setActivities(filteredActivities); 
+};
 
   // Calculate total time spent per activity
   const calculateTotalTimePerActivity = () => {
@@ -114,6 +136,11 @@ function Dashboard() {
   return (
     <main>
       <h2>Dashboard</h2>
+      <div>
+        <h3>Random Quote</h3>
+        <p>{quote}</p>
+        <p><em>{author}</em></p>
+      </div>
       
       <div>
         {/* Timeframe Buttons */}
