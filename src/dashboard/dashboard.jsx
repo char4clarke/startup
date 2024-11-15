@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Pie } from 'react-chartjs-2'; // Import Pie chart component from react-chartjs-2
+import { Chart, ArcElement, Tooltip, Legend } from 'chart.js'; // Import required Chart.js components
 import './Dashboard.css'; // Assuming you'll create a separate CSS file for Dashboard
+
+// Register the required components
+Chart.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
   const [timeframe, setTimeframe] = useState('Today');
@@ -51,6 +56,33 @@ function Dashboard() {
 
   const totalTimes = calculateTotalTimePerActivity();
 
+  // Prepare data for the Pie chart
+  const pieChartData = {
+    labels: Object.keys(totalTimes), // Activity names
+    datasets: [
+      {
+        label: 'Time Spent (minutes)',
+        data: Object.values(totalTimes), // Total time per activity
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0',
+          '#9966FF',
+          '#FF9F40'
+        ],
+        hoverBackgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0',
+          '#9966FF',
+          '#FF9F40'
+        ]
+      }
+    ]
+  };
+
   return (
     <main>
       <h2>Dashboard</h2>
@@ -70,12 +102,11 @@ function Dashboard() {
 
       <div>
         <h3>Time Spent Breakdown</h3>
-        <div style={{width: '10px', height: '10px', textAlign: 'center'}}></div>
-        <img 
-          src="https://www.jaspersoft.com/content/dam/jaspersoft/images/graphics/infographics/pie-chart-example.svg" 
-          alt="Time Spent Breakdown Pie Chart (PLACEHOLDER)" 
-          style={{width: '50%', height: '50%', objectFit: 'contain'}}
-        />
+        
+        {/* Pie Chart */}
+        <div style={{ width: '100%', margin: '0 auto' }}>
+          <Pie data={pieChartData} />
+        </div>
       </div>
 
       <h3>Activity List</h3>
