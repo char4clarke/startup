@@ -19,7 +19,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        const response = await fetch('https://api.quotable.io/random');
+        const response = await fetch('http://api.quotable.io/random');
         if (!response.ok) throw new Error('Failed to fetch quote');
         const data = await response.json();
         setQuote(data.content);
@@ -85,10 +85,11 @@ function Dashboard() {
 
   // Update handleTimeframeChange function
   const handleTimeframeChange = (newTimeframe) => {
-    setTimeframe(newTimeframe);
     const filteredActivities = filterActivitiesByTimeframe(newTimeframe);
-    setActivities(filteredActivities); 
+    setActivities(filteredActivities);
+    setTimeframe(newTimeframe); // Ensure timeframe updates even if activities are the same
 };
+  
 
   // Calculate total time spent per activity
   const calculateTotalTimePerActivity = () => {
@@ -139,7 +140,7 @@ function Dashboard() {
       <div>
         <h3>Random Quote</h3>
         <p>{quote}</p>
-        <p><em>{author}</em></p>
+        <p><em>~ {author}</em></p>
       </div>
       
       <div>
@@ -160,7 +161,7 @@ function Dashboard() {
         
         {/* Pie Chart */}
         <div style={{ width: '100%', margin: '0 auto' }}>
-          <Pie data={pieChartData} />
+          <Pie key={timeframe} data={pieChartData} />
         </div>
       </div>
 
