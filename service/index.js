@@ -91,6 +91,38 @@ app.get('/api/activities/:userId', (req, res) => {
   res.status(200).json(userActivities);
 });
 
+// Endpoint to retrieve weekly data for a specific activity
+app.get('/api/activities/:userId/weekly', (req, res) => {
+    const { userId } = req.params;
+    const { activity } = req.query;
+  
+    // Get today's date and calculate the start of the week (Monday)
+    const today = new Date();
+    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Monday of this week
+  
+    // Filter activities by userId, activity, and date within this week
+    const userActivities = activities.filter((activityEntry) => {
+      const activityDate = new Date(activityEntry.date);
+      return (
+        activityEntry.userId === userId &&
+        activityEntry.activity === activity &&
+        activityDate >= startOfWeek
+      );
+    });
+  
+    // Initialize an array with zeros for each day of the week (Monday to Sunday)
+    const weeklyTotals = [0, 0, 0, 0, 0, 0, 0];
+  
+    // Populate the array with total time spent on each day
+    userActivities.forEach((activityEntry) => {
+      const dayOfWeek = new Date(activityEntry.date).getDay(); // Get day of the week (0=Sunday, ..., 6=Saturday)
+      const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert Sunday (0) to index 6
+      weeklyTotals[dayIndex] += parseFloat(activityEntry.duration); // Add up durations for each day
+    });
+  
+    res.status(200).json({ [activity]: weeklyTotals });
+  });
+
 // Start the server (only call this once)
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
