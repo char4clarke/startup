@@ -34,10 +34,38 @@ function Dashboard() {
     fetchActivities();
   }, [timeframe]); // Re-fetch when timeframe changes
 
-  // Handle timeframe change
+  // Handle timeframe change and filter activities based on last X days
+  const filterActivitiesByTimeframe = (timeframe) => {
+    const today = new Date();
+    let filteredActivities = [];
+
+    if (timeframe === 'Today') {
+      filteredActivities = activities.filter(activity => {
+        const activityDate = new Date(activity.date);
+        return activityDate.toDateString() === today.toDateString();
+      });
+    } else if (timeframe === 'This Week') {
+      const pastWeek = new Date(today.setDate(today.getDate() - 7)); // Last 7 days
+      filteredActivities = activities.filter(activity => {
+        const activityDate = new Date(activity.date);
+        return activityDate >= pastWeek;
+      });
+    } else if (timeframe === 'This Month') {
+      const pastMonth = new Date(today.setDate(today.getDate() - 30)); // Last 30 days
+      filteredActivities = activities.filter(activity => {
+        const activityDate = new Date(activity.date);
+        return activityDate >= pastMonth;
+      });
+    }
+
+    return filteredActivities;
+  };
+
+  // Update handleTimeframeChange function
   const handleTimeframeChange = (newTimeframe) => {
     setTimeframe(newTimeframe);
-    // Here you would typically fetch or update data based on the selected timeframe
+    const filteredActivities = filterActivitiesByTimeframe(newTimeframe);
+    setActivities(filteredActivities); // Update activities state with filtered results
   };
 
   // Calculate total time spent per activity

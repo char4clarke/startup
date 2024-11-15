@@ -126,6 +126,23 @@ app.get('/api/activities/:userId/weekly', (req, res) => {
     res.status(200).json({ [activity]: weeklyTotals });
 });
 
+// Endpoint to retrieve monthly data for a specific user
+app.get('/api/activities/:userId/monthly', (req, res) => {
+    const { userId } = req.params;
+  
+    // Get today's date and calculate the start of the month
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  
+    // Filter activities by userId and date within this month
+    const userActivities = activities.filter((activityEntry) => {
+      const activityDate = new Date(activityEntry.date);
+      return activityEntry.userId === userId && activityDate >= startOfMonth;
+    });
+  
+    res.status(200).json(userActivities);
+  });
+
 // Start the server (only call this once)
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
