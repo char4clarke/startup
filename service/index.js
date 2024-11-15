@@ -57,19 +57,22 @@ app.delete('/api/auth/logout', (req, res) => {
 
 // Endpoint to store activity data
 app.post('/api/activities', (req, res) => {
-  const { userId, activity, duration } = req.body;
+  const { userId, activity, duration, date } = req.body; // Include 'date'
+
+  console.log('Received activity with date:', date); // Log received date
 
   // Validate input
-  if (!userId || !activity || !duration) {
+  if (!userId || !activity || !duration || !date) {
     return res.status(400).json({ msg: 'Missing required fields' });
   }
 
+  // Store the exact date provided by the frontend without converting it to UTC
   const newActivity = {
     id: uuid.v4(),
     userId,
     activity,
     duration,
-    date: new Date().toISOString(),
+    date, // Use provided date from request body as-is
   };
 
   activities.push(newActivity);
@@ -121,7 +124,7 @@ app.get('/api/activities/:userId/weekly', (req, res) => {
     });
   
     res.status(200).json({ [activity]: weeklyTotals });
-  });
+});
 
 // Start the server (only call this once)
 app.listen(port, () => {

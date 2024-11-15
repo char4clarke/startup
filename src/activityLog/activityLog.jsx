@@ -29,6 +29,18 @@ function ActivityLog() {
     fetchActivities();
   }, []); // Empty dependency array means this runs once when the component mounts
 
+  // Helper function to get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  };
+
+  // Validate if a string is a valid date in YYYY-MM-DD format
+  const isValidDate = (dateString) => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    return regex.test(dateString);
+  };
+
   // Handle starting an activity log for predefined activities
   const handleStartLogging = async (activityName) => {
     try {
@@ -37,6 +49,13 @@ function ActivityLog() {
 
       if (!duration) return; // If no duration is entered, exit function
 
+      let date = prompt(`Enter the date (YYYY-MM-DD) for ${activityName} (default: today):`, getTodayDate()); // Prompt for date, defaulting to today
+      
+      if (!isValidDate(date)) {
+        alert("Invalid date format. Please enter a valid date in YYYY-MM-DD format.");
+        return;
+      }
+
       const response = await fetch('/api/activities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,6 +63,7 @@ function ActivityLog() {
           userId,
           activity: activityName,
           duration,
+          date,
         }),
       });
 
@@ -72,6 +92,13 @@ function ActivityLog() {
       const duration = prompt(`Enter duration for ${activityName} in minutes:`);
       if (!duration) return; // Exit if no duration is entered
 
+      let date = prompt(`Enter the date (YYYY-MM-DD) for ${activityName} (default: today):`, getTodayDate()); // Prompt for date, defaulting to today
+      
+      if (!isValidDate(date)) {
+        alert("Invalid date format. Please enter a valid date in YYYY-MM-DD format.");
+        return;
+      }
+
       const response = await fetch('/api/activities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -79,6 +106,7 @@ function ActivityLog() {
           userId,
           activity: activityName,
           duration,
+          date,
         }),
       });
 
@@ -93,12 +121,6 @@ function ActivityLog() {
       console.error('Error logging custom activity:', error);
       setMessage('An error occurred while logging custom activity.');
     }
-  };
-
-  // Handle timeframe change (you can implement filtering logic here)
-  const handleTimeframeChange = (newTimeframe) => {
-    setTimeframe(newTimeframe);
-    // Here you would typically fetch or update data based on the selected timeframe
   };
 
   return (
