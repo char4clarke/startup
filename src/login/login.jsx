@@ -5,17 +5,64 @@ import { useAuth } from '../login/AuthContext';
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (e) => {
+  // Handle login attempt
+  const handleLogin = async (e) => {
     e.preventDefault();
-    login(username);
-    // Here you would typically handle the login logic
-    // For now, we'll just simulate a successful login
-    console.log('Login attempted with:', username, password);
-    // Redirect to dashboard after successful login
-    navigate('/dashboard');
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: username, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        login(username); // Update auth context with username
+        localStorage.setItem('token', data.token); // Store token in localStorage
+        navigate('/dashboard'); // Redirect to dashboard after successful login
+      } else if (response.status === 401) {
+        setErrorMessage('Invalid credentials. Please try again.');
+      } else {
+        setErrorMessage('An error occurred. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      setErrorMessage('An error occurred. Please try again later.');
+    }
+  };
+
+  // Handle account creation
+  const handleCreateAccount = async () => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: username, password }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        login(username); // Update auth context with username
+        localStorage.setItem('token', data.token); // Store token in localStorage
+        navigate('/dashboard'); // Redirect to dashboard after successful registration
+      } else if (response.status === 409) {
+        setErrorMessage('User already exists. Please log in.');
+      } else {
+        setErrorMessage('An error occurred. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      setErrorMessage('An error occurred. Please try again later.');
+    }
   };
 
   return (
@@ -25,7 +72,8 @@ function Login() {
 
       <div>
         <h3>Login</h3>
-        <form onSubmit={handleSubmit}>
+        {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+        <form onSubmit={handleLogin}>
           <label htmlFor="username">Username:</label>
           <input 
             type="text" 
@@ -47,6 +95,10 @@ function Login() {
           />
           <br />
           <button type="submit">Login</button>
+          {/* Add Create button next to Login */}
+          <button type="button" onClick={handleCreateAccount} style={{ marginLeft: '10px' }}>
+            Create Account
+          </button>
         </form>
       </div>
     </main>
