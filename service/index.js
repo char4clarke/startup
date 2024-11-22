@@ -64,6 +64,18 @@ secureApiRouter.use(async (req, res, next) => {
   }
 });
 
+// Add this to your secureApiRouter
+secureApiRouter.get('/user', async (req, res) => {
+  const authToken = req.cookies[authCookieName];
+  const user = await DB.getUserByToken(authToken);
+  
+  if (user) {
+    res.json({ _id: user._id, email: user.email });
+  } else {
+    res.status(401).json({ message: 'Not authenticated' });
+  }
+});
+
 // Endpoint to store activity data
 secureApiRouter.post('/activities', async (req, res) => {
   const { userId, activity, duration, date } = req.body;

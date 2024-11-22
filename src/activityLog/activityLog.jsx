@@ -5,29 +5,57 @@ function ActivityLog() {
   const [timeframe, setTimeframe] = useState('Today');
   const [activities, setActivities] = useState([]); // Initialize as empty array
   const [message, setMessage] = useState(''); // For success/error messages
+  const [user, setUser] = useState(null);
 
-  // Fetch activities from the backend when the component mounts
-  useEffect(() => {
-    const fetchActivities = async () => {
-      try {
-        const userId = '123'; // Replace this with actual user ID from auth context or localStorage
-        const response = await fetch(`/api/activities/${userId}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          setActivities(data); // Set fetched activities in state
-        } else {
-          console.error('Failed to fetch activities');
-          setMessage('Failed to fetch activities.');
-        }
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-        setMessage('An error occurred while fetching activities.');
+  const fetchUser = async () => {
+    try {
+      const response = await fetch('/api/user', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        setMessage('Failed to fetch user information.');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      setMessage('An error occurred while fetching user information.');
+    }
+  };
 
-    fetchActivities();
-  }, []); // Empty dependency array means this runs once when the component mounts
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const fetchActivities = async () => {
+    try {
+      if (!user) {
+        setMessage('Please log in to view activities.');
+        return;
+      }
+      const response = await fetch(`/api/activities/${user._id}`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setActivities(data);
+      } else {
+        console.error('Failed to fetch activities');
+        setMessage('Failed to fetch activities.');
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setMessage('An error occurred while fetching activities.');
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchActivities();
+    }
+  }, [user]);
 
   // Helper function to get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
@@ -44,7 +72,6 @@ function ActivityLog() {
   // Handle starting an activity log for predefined activities
   const handleStartLogging = async (activityName) => {
     try {
-      const userId = '123'; // Replace with actual user ID from auth context or localStorage
       const duration = prompt(`Enter duration for ${activityName} in minutes:`); // Prompt for duration
 
       if (!duration) return; // If no duration is entered, exit function
@@ -60,7 +87,7 @@ function ActivityLog() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId,
+          userId: user.email,
           activity: activityName,
           duration,
           date,
@@ -83,7 +110,6 @@ function ActivityLog() {
   // Handle logging a custom "New" activity
   const handleNewActivityLogging = async () => {
     try {
-      const userId = '123'; // Replace with actual user ID from auth context or localStorage
       
       // Prompt for custom activity name and duration
       const activityName = prompt("Enter the name of the new activity:");
@@ -103,7 +129,7 @@ function ActivityLog() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId,
+          userId: user.email,
           activity: activityName,
           duration,
           date,
