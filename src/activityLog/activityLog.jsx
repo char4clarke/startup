@@ -34,7 +34,7 @@ function ActivityLog() {
         setMessage('Please log in to view activities.');
         return;
       }
-      const response = await fetch(`/api/activities/${user._id}`, {
+      const response = await fetch(`/api/activities/${user.email}`, {
         credentials: 'include'
       });
       

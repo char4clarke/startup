@@ -1,46 +1,70 @@
 import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
-import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js'; // Import required components
-import './Insights.css'; // Assuming you'll create a separate CSS file for Insights
+import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import './Insights.css';
 
-// Register necessary components for Bar chart
 Chart.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 function Insights() {
-  const [selectedActivity, setSelectedActivity] = useState('Studying'); // Default selected activity
-  const [weeklyData, setWeeklyData] = useState({}); // Initialize as empty object
-  const [message, setMessage] = useState(''); // For success/error messages
+  const [selectedActivity, setSelectedActivity] = useState('Studying');
+  const [weeklyData, setWeeklyData] = useState({});
+  const [message, setMessage] = useState('');
+  const [user, setUser] = useState(null);
 
-  // Fetch weekly data for the selected activity when component mounts or when selectedActivity changes
-  useEffect(() => {
-    const fetchWeeklyData = async () => {
-      try {
-        const userId = '123'; // Replace this with actual user ID from auth context or localStorage
-        const response = await fetch(`/api/activities/${userId}/weekly?activity=${selectedActivity}`); // Fetch weekly data for selected activity
-        
-        if (response.ok) {
-          const data = await response.json();
-          setWeeklyData(data); // Set fetched weekly data in state
-        } else {
-          console.error('Failed to fetch weekly data');
-          setMessage('Failed to fetch weekly data.');
-        }
-      } catch (error) {
-        console.error('Error fetching weekly data:', error);
-        setMessage('An error occurred while fetching weekly data.');
+  const fetchUser = async () => {
+    try {
+      const response = await fetch('/api/user', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        setMessage('Failed to fetch user information.');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      setMessage('An error occurred while fetching user information.');
+    }
+  };
 
-    fetchWeeklyData();
-  }, [selectedActivity]); // Re-fetch when selectedActivity changes
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
-  // Prepare data for Bar chart
+  const fetchWeeklyData = async () => {
+    if (!user) return;
+
+    try {
+      const response = await fetch(`/api/activities/${encodeURIComponent(user.email)}/weekly?activity=${selectedActivity}`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setWeeklyData(data);
+      } else {
+        console.error('Failed to fetch weekly data');
+        setMessage('Failed to fetch weekly data.');
+      }
+    } catch (error) {
+      console.error('Error fetching weekly data:', error);
+      setMessage('An error occurred while fetching weekly data.');
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchWeeklyData();
+    }
+  }, [user, selectedActivity]);
+
   const barChartData = {
-    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], // Days of the week
+    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
     datasets: [
       {
         label: `${selectedActivity} Time (minutes)`,
-        data: weeklyData[selectedActivity] || [], // Data for selected activity (default to empty array if no data)
+        data: weeklyData[selectedActivity] || [],
         backgroundColor: '#36A2EB',
         borderColor: '#36A2EB',
         borderWidth: 1,
@@ -77,6 +101,19 @@ function Insights() {
     },
   };
 
+  const calculateAverage = (data) => {
+    if (!data || data.length === 0) return 0;
+    return data.reduce((a, b) => a + b, 0) / data.length;
+  };
+
+  const calculatePercentageChange = (data) => {
+    if (!data || data.length === 0) return 0;
+    const firstDay = data[0];
+    const weekTotal = data.reduce((a, b) => a + b, 0);
+    if (firstDay === 0) return 0;
+    return Math.round((1 - (weekTotal / (7 * firstDay))) * 100);
+  };
+
   return (
     <main>
       <h2>Insights</h2>
@@ -99,7 +136,6 @@ function Insights() {
       <div>
         <h3>Time Spent Analysis</h3>
         
-        {/* Bar Chart */}
         <div style={{ width:'600px', height:'400px', marginTop:'20px', marginLeft:'auto', marginRight:'auto' }}>
           <Bar data={barChartData} options={barChartOptions} />
         </div>
@@ -109,13 +145,12 @@ function Insights() {
         <h3>Personalized Insights</h3>
         <ul>
           <li>Most productive time: 9 AM - 11 AM</li>
-          {/* Example insights based on fetched data */}
-          <li>Weekly average for entertainment: {weeklyData.Entertainment ? (weeklyData.Entertainment.reduce((a,b) => a + b) / weeklyData.Entertainment.length) : 0} minutes/day</li>
-          <li>Time spent on social media down by {weeklyData['Social Media'] ? Math.round((1 - (weeklyData['Social Media'].reduce((a,b) => a + b) / (7 * weeklyData['Social Media'][0]))) *100):0}%</li>
+          <li>Weekly average for {selectedActivity}: {calculateAverage(weeklyData[selectedActivity]).toFixed(2)} minutes/day</li>
+          <li>Time spent on {selectedActivity} changed by {calculatePercentageChange(weeklyData[selectedActivity])}%</li>
         </ul>
       </div>
 
-      {message && <p>{message}</p>} {/* Display success/error message */}
+      {message && <p>{message}</p>}
       
     </main>
   );

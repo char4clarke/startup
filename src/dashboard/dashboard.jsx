@@ -11,6 +11,28 @@ function Dashboard() {
   const [message, setMessage] = useState('');
   const [quote, setQuote] = useState('');
   const [author, setAuthor] = useState('');
+  const [user, setUser] = useState(null);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch('/api/user', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        setMessage('Failed to fetch user information.');
+      }
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      setMessage('An error occurred while fetching user information.');
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     const fetchQuote = async () => {
@@ -33,7 +55,7 @@ function Dashboard() {
 
   const fetchActivities = async () => {
     try {
-      const userId = '123'; // Replace this with actual user ID from auth context or localStorage
+      const userId = user.email; // Replace this with actual user ID from auth context or localStorage
       const response = await fetch(`/api/activities/${userId}`);
       
       if (response.ok) {
@@ -48,6 +70,12 @@ function Dashboard() {
       setMessage('An error occurred while fetching activities.');
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchActivities();
+    }
+  }, [user]);
 
   const filterActivitiesByTimeframe = (activities, timeframe) => {
     const today = new Date();
