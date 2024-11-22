@@ -1,62 +1,71 @@
 const express = require('express');
-const uuid = require('uuid');
-const path = require('path'); // Import path module for serving index.html
+const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+const path = require('path');
+const DB = require('./database.js');
 
 const app = express();
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
 
+const authCookieName = 'token';
+
 app.use(express.json());
-
-// Serve static files from 'public' directory
+app.use(cookieParser());
 app.use(express.static('public'));
+app.set('trust proxy', true);
 
-let users = {}; // In-memory user storage
-let activities = []; // In-memory storage for activities
+const apiRouter = express.Router();
+app.use('/api', apiRouter);
 
 // Register a new user
-app.post('/api/auth/register', (req, res) => {
+apiRouter.post('/auth/register', async (req, res) => {
   const { email, password } = req.body;
   
-  if (users[email]) {
+  if (await DB.getUser(email)) {
     return res.status(409).json({ msg: 'User already exists' });
   }
 
-  const user = { email, password, token: uuid.v4() };
-  users[email] = user;
-
+  const user = await DB.createUser(email, password);
+  setAuthCookie(res, user.token);
   res.status(201).json({ token: user.token });
 });
 
 // Login an existing user
-app.post('/api/auth/login', (req, res) => {
+apiRouter.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
   
-  const user = users[email];
+  const user = await DB.getUser(email);
   
-  if (user && user.password === password) {
-    user.token = uuid.v4();
+  if (user && await bcrypt.compare(password, user.password)) {
+    setAuthCookie(res, user.token);
     return res.json({ token: user.token });
   }
 
   return res.status(401).json({ msg: 'Invalid credentials' });
 });
 
-// Logout a user by deleting their token
-app.delete('/api/auth/logout', (req, res) => {
-  const { token } = req.body;
+// Logout a user
+apiRouter.delete('/auth/logout', (_req, res) => {
+  res.clearCookie(authCookieName);
+  res.status(204).end();
+});
 
-  const user = Object.values(users).find(u => u.token === token);
-  
+// Secure API Router
+const secureApiRouter = express.Router();
+apiRouter.use(secureApiRouter);
+
+secureApiRouter.use(async (req, res, next) => {
+  const authToken = req.cookies[authCookieName];
+  const user = await DB.getUserByToken(authToken);
   if (user) {
-    delete user.token;
-    return res.status(204).end();
+    next();
+  } else {
+    res.status(401).json({ msg: 'Unauthorized' });
   }
-
-  return res.status(400).json({ msg: 'Invalid token' });
 });
 
 // Endpoint to store activity data
-app.post('/api/activities', (req, res) => {
+secureApiRouter.post('/activities', async (req, res) => {
   const { userId, activity, duration, date } = req.body;
 
   if (!userId || !activity || !duration || !date) {
@@ -64,23 +73,21 @@ app.post('/api/activities', (req, res) => {
   }
 
   const newActivity = {
-    id: uuid.v4(),
     userId,
     activity,
     duration,
     date,
   };
 
-  activities.push(newActivity);
-  
+  await DB.addActivity(newActivity);
   res.status(201).json(newActivity);
 });
 
 // Endpoint to retrieve all activities for a specific user
-app.get('/api/activities/:userId', (req, res) => {
+secureApiRouter.get('/activities/:userId', async (req, res) => {
   const { userId } = req.params;
   
-  const userActivities = activities.filter(activity => activity.userId === userId);
+  const userActivities = await DB.getActivities(userId);
   
   if (!userActivities.length) {
     return res.status(404).json({ msg: 'No activities found for this user' });
@@ -90,41 +97,44 @@ app.get('/api/activities/:userId', (req, res) => {
 });
 
 // Endpoint to retrieve weekly data for a specific activity
-app.get('/api/activities/:userId/weekly', (req, res) => {
-    const { userId } = req.params;
-    const { activity } = req.query;
-  
-    // Get today's date and calculate the start of the week (Monday)
-    const today = new Date();
-    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Monday of this week
-  
-    // Filter activities by userId, activity, and date within this week
-    const userActivities = activities.filter((activityEntry) => {
-      const activityDate = new Date(activityEntry.date);
-      return (
-        activityEntry.userId === userId &&
-        activityEntry.activity === activity &&
-        activityDate >= startOfWeek
-      );
-    });
-  
-    // Initialize an array with zeros for each day of the week (Monday to Sunday)
-    const weeklyTotals = [0, 0, 0, 0, 0, 0, 0];
-  
-    // Populate the array with total time spent on each day
-    userActivities.forEach((activityEntry) => {
-      const dayOfWeek = new Date(activityEntry.date).getDay(); // Get day of the week (0=Sunday, ..., 6=Saturday)
-      const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert Sunday (0) to index 6
-      weeklyTotals[dayIndex] += parseFloat(activityEntry.duration); // Add up durations for each day
-    });
-  
-    res.status(200).json({ [activity]: weeklyTotals });
+secureApiRouter.get('/activities/:userId/weekly', async (req, res) => {
+  const { userId } = req.params;
+  const { activity } = req.query;
+
+  const today = new Date();
+  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+
+  const userActivities = await DB.getWeeklyActivities(userId, activity, startOfWeek);
+
+  const weeklyTotals = [0, 0, 0, 0, 0, 0, 0];
+
+  userActivities.forEach((activityEntry) => {
+    const dayOfWeek = new Date(activityEntry.date).getDay();
+    const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    weeklyTotals[dayIndex] += parseFloat(activityEntry.duration);
+  });
+
+  res.status(200).json({ [activity]: weeklyTotals });
 });
 
 // Fallback route to serve index.html for React Router support
 app.get('*', (req, res) => {
-   res.sendFile(path.join(__dirname + '/public/index.html'));
+   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// Default error handler
+app.use(function (err, req, res, next) {
+  res.status(500).send({ type: err.name, message: err.message });
+});
+
+// setAuthCookie in the HTTP response
+function setAuthCookie(res, authToken) {
+  res.cookie(authCookieName, authToken, {
+    secure: true,
+    httpOnly: true,
+    sameSite: 'strict',
+  });
+}
 
 // Start the server
 app.listen(port, () => {
