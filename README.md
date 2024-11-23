@@ -70,11 +70,11 @@ Below are rough sketches of the application's user interface:
   - **Analytics**: Analytics data for visualization.
   - **Third-Party API**: Integration with a third-party API to grab random quotes displayed on the dashboard page.
 
-### Authentication
-- **Login/Signup**: Secure login system allowing users to create accounts and manage their profiles.
-
-### Database
-- **Persistent Storage**: Store user data, activity logs, and analytics in a database. Support for user authentication and activity tracking.
+### Authentication/Database ✅
+- **MongoDB**: Created a MongoDB atlas database to store user login info and activities logged for each user.
+- **User Registration**: Create a new user in the database.
+- **Existing User/Logout**: Stores activity data and user credentials for the same user if the user already exists. Allows users to logout taking them back to the login page. 
+- **Restricts Functionality**: You cannot log activities unless you have an account and have logged in.
 
 ### WebSocket
 - **Real-Time Updates**: Use WebSockets to provide real-time updates for activity logs and analytics, ensuring users see live data changes.
