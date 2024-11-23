@@ -4,28 +4,47 @@ const uuid = require('uuid');
 const config = require('./dbConfig.json');
 
 const url = `mongodb+srv://${config.userName}:${config.password}@${config.hostname}`;
-const client = new MongoClient(url);
-const db = client.db('activityTracker');
-const userCollection = db.collection('user');
-const activityCollection = db.collection('activity');
+const client = new MongoClient(url, {
+    tls: true,
+    tlsAllowInvalidCertificates: false,
+  });
+
+let db, userCollection, activityCollection;
 
 // This will asynchronously test the connection and exit the process if it fails
-(async function testConnection() {
-  await client.connect();
-  await db.command({ ping: 1 });
-})().catch((ex) => {
-  console.log(`Unable to connect to database with ${url} because ${ex.message}`);
-  process.exit(1);
-});
+async function connectToDatabase() {
+  try {
+    await client.connect();
+    console.log('Connected to MongoDB');
+    db = client.db('activityTracker');
+    userCollection = db.collection('user');
+    activityCollection = db.collection('activity');
+    await db.command({ ping: 1 });
+    console.log('Database ping successful');
+  } catch (ex) {
+    console.log(`Unable to connect to database with ${url} because ${ex.message}`);
+    process.exit(1);
+  }
+}
 
+// Call the connection function
+connectToDatabase();
+
+// Rest of your functions remain the same
 function getUser(email) {
   return userCollection.findOne({ email: email });
 }
 
 function getUserByToken(token) {
-  return userCollection.findOne({ token: token });
+    return userCollection.findOne({ token: token });
 }
 
+async function updateUserToken(email) {
+    const newToken = uuid.v4();
+    await userCollection.updateOne({ email }, { $set: { token: newToken } });
+    return newToken;
+  }
+  
 async function createUser(email, password) {
   const passwordHash = await bcrypt.hash(password, 10);
   const user = {
@@ -56,11 +75,12 @@ function getWeeklyActivities(userId, activity, startOfWeek, endOfWeek) {
     }).toArray();
   }
 
-module.exports = {
-  getUser,
-  getUserByToken,
-  createUser,
-  addActivity,
-  getActivities,
-  getWeeklyActivities,
-};
+  module.exports = {
+    getUser,
+    getUserByToken,
+    createUser,
+    addActivity,
+    getActivities,
+    getWeeklyActivities,
+    updateUserToken
+  };

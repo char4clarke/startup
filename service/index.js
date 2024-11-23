@@ -37,8 +37,9 @@ apiRouter.post('/auth/login', async (req, res) => {
   const user = await DB.getUser(email);
   
   if (user && await bcrypt.compare(password, user.password)) {
-    setAuthCookie(res, user.token);
-    return res.json({ token: user.token });
+    const newToken = await DB.updateUserToken(email);
+    setAuthCookie(res, newToken);
+    return res.json({ token: newToken, email: user.email });
   }
 
   return res.status(401).json({ msg: 'Invalid credentials' });

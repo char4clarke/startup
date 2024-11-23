@@ -12,7 +12,7 @@ function Login() {
   // Handle login attempt
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -21,10 +21,10 @@ function Login() {
         },
         body: JSON.stringify({ email: username, password }),
       });
-
+  
       if (response.ok) {
         const data = await response.json();
-        login(username); // Update auth context with username
+        login(data.email); // Update auth context with email
         localStorage.setItem('token', data.token); // Store token in localStorage
         navigate('/dashboard'); // Redirect to dashboard after successful login
       } else if (response.status === 401) {
