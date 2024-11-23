@@ -37,10 +37,14 @@ function Dashboard() {
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        const response = await fetch('http://api.quotable.io/random');
+        const response = await fetch('https://api.api-ninjas.com/v1/quotes?category=happiness', {
+          headers: {
+            'X-Api-Key': 'bjRfbTYRVW5Mvy6LyxQTTg==LaaJNBQUlk2ktKtl'
+          }
+        });
         if (!response.ok) throw new Error('Failed to fetch quote');
-        const data = await response.json();
-        setQuote(data.content);
+        const [data] = await response.json();
+        setQuote(data.quote);
         setAuthor(data.author);
       } catch (error) {
         console.error('Error fetching quote:', error);
@@ -50,12 +54,15 @@ function Dashboard() {
     };
 
     fetchQuote();
-    fetchActivities();
   }, []);
 
   const fetchActivities = async () => {
     try {
-      const userId = user.email; // Replace this with actual user ID from auth context or localStorage
+      if (!user) {
+        console.log('User data not available yet');
+        return;
+      }
+      const userId = user.email;
       const response = await fetch(`/api/activities/${userId}`);
       
       if (response.ok) {
@@ -78,16 +85,15 @@ function Dashboard() {
   }, [user]);
 
   const filterActivitiesByTimeframe = (activities, timeframe) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of day
-
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-
+  
     return activities.filter(activity => {
       const activityDate = new Date(activity.date);
-      activityDate.setHours(0, 0, 0, 0); // Set to start of day
-
+      activityDate.setHours(0, 0, 0, 0);
+  
       if (timeframe === 'Today') {
         return activityDate.getTime() === yesterday.getTime();
       } else if (timeframe === 'This Week') {

@@ -110,23 +110,39 @@ secureApiRouter.get('/activities/:userId', async (req, res) => {
 
 // Endpoint to retrieve weekly data for a specific activity
 secureApiRouter.get('/activities/:userId/weekly', async (req, res) => {
-  const { userId } = req.params;
-  const { activity } = req.query;
+  try {
+    const { userId } = req.params;
+    const { activity } = req.query;
 
-  const today = new Date();
-  const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+    console.log(`Fetching weekly activities for user ${userId} and activity ${activity}`);
 
-  const userActivities = await DB.getWeeklyActivities(userId, activity, startOfWeek);
+    const today = new Date();
+    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
 
-  const weeklyTotals = [0, 0, 0, 0, 0, 0, 0];
+    console.log(`Week range: ${startOfWeek.toISOString()} to ${endOfWeek.toISOString()}`);
 
-  userActivities.forEach((activityEntry) => {
-    const dayOfWeek = new Date(activityEntry.date).getDay();
-    const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    weeklyTotals[dayIndex] += parseFloat(activityEntry.duration);
-  });
+    const userActivities = await DB.getWeeklyActivities(userId, activity, startOfWeek, endOfWeek);
 
-  res.status(200).json({ [activity]: weeklyTotals });
+    console.log("Retrieved activities:", userActivities);
+
+    const weeklyTotals = [0, 0, 0, 0, 0, 0, 0];
+    userActivities.forEach((activityEntry) => {
+      const activityDate = new Date(activityEntry.date);
+      console.log('Activity date:', activityDate);
+      const dayOfWeek = activityDate.getDay();
+      const dayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      weeklyTotals[dayIndex] += parseFloat(activityEntry.duration);
+    });
+
+    console.log(`Weekly totals for ${activity}:`, weeklyTotals);
+    res.status(200).json({ [activity]: weeklyTotals });
+  } catch (error) {
+    console.error("Error in weekly activities endpoint:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // Fallback route to serve index.html for React Router support

@@ -45,13 +45,16 @@ function getActivities(userId) {
   return activityCollection.find({ userId: userId }).toArray();
 }
 
-function getWeeklyActivities(userId, activity, startOfWeek) {
-  return activityCollection.find({
-    userId: userId,
-    activity: activity,
-    date: { $gte: startOfWeek }
-  }).toArray();
-}
+function getWeeklyActivities(userId, activity, startOfWeek, endOfWeek) {
+    return activityCollection.find({
+      userId: userId,
+      activity: activity,
+      date: {
+        $gte: startOfWeek.toISOString(),
+        $lt: endOfWeek.toISOString()
+      }
+    }).toArray();
+  }
 
 module.exports = {
   getUser,

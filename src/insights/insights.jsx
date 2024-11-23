@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { Chart, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import './Insights.css';
@@ -32,16 +32,17 @@ function Insights() {
     fetchUser();
   }, []);
 
-  const fetchWeeklyData = async () => {
+  const fetchWeeklyData = useCallback(async () => {
     if (!user) return;
-
+  
     try {
       const response = await fetch(`/api/activities/${encodeURIComponent(user.email)}/weekly?activity=${selectedActivity}`, {
         credentials: 'include'
       });
-      
+  
       if (response.ok) {
         const data = await response.json();
+        console.log("Weekly Data:", data);
         setWeeklyData(data);
       } else {
         console.error('Failed to fetch weekly data');
@@ -51,13 +52,13 @@ function Insights() {
       console.error('Error fetching weekly data:', error);
       setMessage('An error occurred while fetching weekly data.');
     }
-  };
+  }, [user, selectedActivity]);
 
   useEffect(() => {
     if (user) {
       fetchWeeklyData();
     }
-  }, [user, selectedActivity]);
+  }, [user, selectedActivity, fetchWeeklyData]);
 
   const barChartData = {
     labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
@@ -145,13 +146,12 @@ function Insights() {
         <h3>Personalized Insights</h3>
         <ul>
           <li>Most productive time: 9 AM - 11 AM</li>
-          <li>Weekly average for {selectedActivity}: {calculateAverage(weeklyData[selectedActivity]).toFixed(2)} minutes/day</li>
-          <li>Time spent on {selectedActivity} changed by {calculatePercentageChange(weeklyData[selectedActivity])}%</li>
+          <li>Weekly average for {selectedActivity}: {calculateAverage(weeklyData[selectedActivity] || []).toFixed(2)} minutes/day</li>
+          <li>Time spent on {selectedActivity} changed by {calculatePercentageChange(weeklyData[selectedActivity] || [])}%</li>
         </ul>
       </div>
 
       {message && <p>{message}</p>}
-      
     </main>
   );
 }
