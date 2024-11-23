@@ -1,1 +1,18 @@
+# Ignore database configuration file
 dbConfig.json
+
+# Ignore all .config files
+*.config
+
+# Ignore all files containing 'config' or 'secret' in their names
+*config*.json
+*secret*.json
+
+# Ignore environment files
+.env
+
+# Ignore node_modules directory
+node_modules/
+
+# Ignore log files
+*.log
