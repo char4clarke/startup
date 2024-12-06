@@ -12,6 +12,53 @@ function Dashboard() {
   const [quote, setQuote] = useState('');
   const [author, setAuthor] = useState('');
   const [user, setUser] = useState(null);
+  const [socket, setSocket] = useState(null);
+
+  // WebSocket connection setup
+  useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    function connect() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      const ws = new WebSocket(`${protocol}//${host}/ws`);
+      
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        setSocket(ws);
+        retryCount = 0;
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'activityUpdate' && data.userId !== user?.email) {
+          fetchActivities();
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`Retrying connection... Attempt ${retryCount}`);
+          setTimeout(connect, 3000);
+        }
+      };
+
+      return ws;
+    }
+
+    const ws = connect();
+
+    return () => {
+      if (ws) ws.close();
+    };
+  }, [user]);
 
   const fetchUser = async () => {
     try {
@@ -68,6 +115,14 @@ function Dashboard() {
       if (response.ok) {
         const data = await response.json();
         setActivities(data);
+        // Broadcast activity update
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({
+            type: 'activityUpdate',
+            userId: userId,
+            activities: data
+          }));
+        }
       } else {
         console.error('Failed to fetch activities');
         setMessage('Failed to fetch activities.');
@@ -144,6 +199,26 @@ function Dashboard() {
       }
     ]
   };
+  
+  // useEffect(() => {
+  //   if (socket) {
+  //     socket.onmessage = (event) => {
+  //       const data = JSON.parse(event.data);
+  //       if (data.type === 'activityUpdate') {
+  //         // Update the pie chart data
+  //         const filteredActivities = filterActivitiesByTimeframe(activities, timeframe);
+  //         const totals = calculateTotalTimePerActivity(filteredActivities);
+  //         setPieChartData({
+  //           ...pieChartData,
+  //           datasets: [{
+  //             ...pieChartData.datasets[0],
+  //             data: Object.values(totals)
+  //           }]
+  //         });
+  //       }
+  //     };
+  //   }
+  // }, [socket, activities, timeframe]);
 
   return (
     <main>
