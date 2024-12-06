@@ -3,10 +3,15 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const DB = require('./database.js');
+const http = require('http');
+const WebSocket = require('ws');
+const uuid = require('uuid');
 
 const app = express();
-const port = process.argv.length > 2 ? process.argv[2] : 4000;
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
+const port = process.argv.length > 2 ? process.argv[2] : 4000;
 const authCookieName = 'token';
 
 app.use(express.json());
@@ -16,6 +21,20 @@ app.set('trust proxy', true);
 
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
+
+// WebSocket connection handler
+wss.on('connection', (ws) => {
+  console.log('WebSocket client connected');
+
+  ws.on('message', (message) => {
+    console.log('Received:', message);
+    // Handle incoming messages
+  });
+
+  ws.on('close', () => {
+    console.log('WebSocket client disconnected');
+  });
+});
 
 // Register a new user
 apiRouter.post('/auth/register', async (req, res) => {
@@ -65,7 +84,6 @@ secureApiRouter.use(async (req, res, next) => {
   }
 });
 
-// Add this to your secureApiRouter
 secureApiRouter.get('/user', async (req, res) => {
   const authToken = req.cookies[authCookieName];
   const user = await DB.getUserByToken(authToken);
@@ -166,6 +184,6 @@ function setAuthCookie(res, authToken) {
 }
 
 // Start the server
-app.listen(port, () => {
+server.listen(port, () => {
    console.log(`Server is running on port ${port}`);
 });
