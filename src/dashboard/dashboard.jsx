@@ -208,9 +208,6 @@ function Dashboard() {
   return (
     <main>
       <h2>Dashboard</h2>
-      <div className={`websocket-status ${isConnected ? 'connected' : 'disconnected'}`}>
-        WebSocket: {isConnected ? 'Connected' : 'Disconnected'}
-      </div>
       <div>
         <h3>Random Quote</h3>
         <p>{quote}</p>
