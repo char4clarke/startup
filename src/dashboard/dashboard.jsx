@@ -14,7 +14,7 @@ function Dashboard() {
   const [author, setAuthor] = useState('');
   const [user, setUser] = useState(null);
 
-  const { isConnected, sendMessage, ws } = useWebSocket('ws://localhost:4000');
+  const { isConnected, sendMessage, ws } = useWebSocket();
 
   useEffect(() => {
     if (ws) {
@@ -96,7 +96,10 @@ function Dashboard() {
       };
   
       // Use the WebSocket instance directly instead of window.addEventListener
-      const ws = new WebSocket('ws://localhost:4000');
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.host;
+      const url = `${protocol}//${host}/ws`;
+      const ws = new WebSocket(url);
       ws.onmessage = handleWebSocketMessage;
   
       return () => {
@@ -106,6 +109,7 @@ function Dashboard() {
   }, [isConnected]);
 
   const filterActivitiesByTimeframe = (activities, timeframe) => {
+    console.log('Filtering activities:', activities, 'Timeframe:', timeframe);
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const yesterday = new Date(today);
@@ -130,22 +134,8 @@ function Dashboard() {
     });
   };
 
-  useEffect(() => {
-    if (user && isConnected) {
-      console.log('Sending fetchActivities message');
-      sendMessage(JSON.stringify({ type: 'fetchActivities', userId: user.email }));
-    }
-  }, [user, isConnected, sendMessage]);
-  
-  const handleTimeframeChange = (newTimeframe) => {
-    setTimeframe(newTimeframe);
-    if (isConnected && user) {
-      console.log('Sending updateTimeframe message');
-      sendMessage(JSON.stringify({ type: 'updateTimeframe', userId: user.email, timeframe: newTimeframe }));
-    }
-  };
-
   const calculateTotalTimePerActivity = (filteredActivities) => {
+    console.log('Calculating totals for filtered activities:', filteredActivities);    
     const totals = {};
 
     filteredActivities.forEach((activity) => {
@@ -158,9 +148,27 @@ function Dashboard() {
     return totals;
   };
 
-  const filteredActivities = filterActivitiesByTimeframe(activities, timeframe);
-  const totalTimes = calculateTotalTimePerActivity(filteredActivities);
+  useEffect(() => {
+    if (user && isConnected) {
+      console.log('Sending fetchActivities message');
+      sendMessage({ type: 'fetchActivities', userId: user.email });
+    }
+  }, [user, isConnected, sendMessage]);
 
+  const handleTimeframeChange = (newTimeframe) => {
+    setTimeframe(newTimeframe);
+    if (isConnected && user) {
+      console.log('Sending updateTimeframe message');
+      sendMessage({ type: 'updateTimeframe', userId: user.email, timeframe: newTimeframe });
+    }
+  };
+
+  const filteredActivities = filterActivitiesByTimeframe(activities, timeframe);
+  console.log('Filtered activities:', filteredActivities);
+
+  const totalTimes = calculateTotalTimePerActivity(filteredActivities);
+  console.log('Total times:', totalTimes);
+  
   const pieChartData = {
     labels: Object.keys(totalTimes),
     datasets: [
@@ -180,6 +188,9 @@ function Dashboard() {
   return (
     <main>
       <h2>Dashboard</h2>
+      <div className={`websocket-status ${isConnected ? 'connected' : 'disconnected'}`}>
+        WebSocket: {isConnected ? 'Connected' : 'Disconnected'}
+      </div>
       <div>
         <h3>Random Quote</h3>
         <p>{quote}</p>
@@ -201,17 +212,18 @@ function Dashboard() {
       <div>
         <h3>Time Spent Breakdown</h3>
         <div style={{ width: '100%', margin: '0 auto' }}>
-          <Pie key={timeframe} data={pieChartData} />
+          {Object.keys(totalTimes).length > 0 ? (
+            <Pie key={timeframe} data={pieChartData} />
+          ) : (
+            <p>No activities to display</p>
+          )}
         </div>
       </div>
-
       <h3>Activity List</h3>
-      {message && <p>{message}</p>}
-      
       <ul>
-        {Object.keys(totalTimes).map((activityName, index) => (
+        {Object.entries(totalTimes).map(([activity, duration], index) => (
           <li key={index}>
-            {activityName}: {totalTimes[activityName]} minutes
+            {activity}: {duration} minutes
           </li>
         ))}
       </ul>
