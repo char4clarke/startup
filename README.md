@@ -81,3 +81,4 @@ Below are rough sketches of the application's user interface:
 - **Frontend Makes WebSocket Connection**: Done
 - **Data Sent Over WebSocket Connection**: The activity data for the dashboard is sent through WebSocket.
 - **Real-Time Updates**: The WebSocket data is used to provide real-time updates for activity logs on the dashboard, ensuring users see live data changes.
+- **All Visible Elements are Working**: The app is fully functional, all previously mocked-up components now work smoothly!
