@@ -185,25 +185,6 @@ function Dashboard() {
     ]
   };
   
-  // useEffect(() => {
-  //   if (socket) {
-  //     socket.onmessage = (event) => {
-  //       const data = JSON.parse(event.data);
-  //       if (data.type === 'activityUpdate') {
-  //         // Update the pie chart data
-  //         const filteredActivities = filterActivitiesByTimeframe(activities, timeframe);
-  //         const totals = calculateTotalTimePerActivity(filteredActivities);
-  //         setPieChartData({
-  //           ...pieChartData,
-  //           datasets: [{
-  //             ...pieChartData.datasets[0],
-  //             data: Object.values(totals)
-  //           }]
-  //         });
-  //       }
-  //     };
-  //   }
-  // }, [socket, activities, timeframe]);
 
   return (
     <main>
