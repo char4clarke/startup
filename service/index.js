@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const DB = require('./database.js');
+const { peerProxy } = require('./peerProxy.js');
 
 const app = express();
 const port = process.argv.length > 2 ? process.argv[2] : 4000;
@@ -165,7 +166,15 @@ function setAuthCookie(res, authToken) {
   });
 }
 
-// Start the server
-app.listen(port, () => {
-   console.log(`Server is running on port ${port}`);
+const httpService = app.listen(port, () => {
+  console.log(`Listening on port ${port}`);
 });
+
+console.log('Setting up WebSocket server...');
+peerProxy(httpService);
+console.log('WebSocket server setup completed');
+
+// Add a simple ping every 30 seconds to check if WebSocket is still active
+setInterval(() => {
+  console.log('Sending ping to all WebSocket connections');
+}, 30000);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 import './Dashboard.css';
+import useWebSocket from './useWebSocket';
 
 Chart.register(ArcElement, Tooltip, Legend);
 
@@ -12,6 +13,24 @@ function Dashboard() {
   const [quote, setQuote] = useState('');
   const [author, setAuthor] = useState('');
   const [user, setUser] = useState(null);
+
+  const { isConnected, sendMessage, ws } = useWebSocket('ws://localhost:4000');
+
+  useEffect(() => {
+    if (ws) {
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Received WebSocket message:', data);
+          if (data.type === 'activities') {
+            setActivities(data.activities);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+    }
+  }, [ws]);
 
   const fetchUser = async () => {
     try {
@@ -56,33 +75,35 @@ function Dashboard() {
     fetchQuote();
   }, []);
 
-  const fetchActivities = async () => {
-    try {
-      if (!user) {
-        console.log('User data not available yet');
-        return;
-      }
-      const userId = user.email;
-      const response = await fetch(`/api/activities/${userId}`);
-      
-      if (response.ok) {
-        const data = await response.json();
-        setActivities(data);
-      } else {
-        console.error('Failed to fetch activities');
-        setMessage('Failed to fetch activities.');
-      }
-    } catch (error) {
-      console.error('Error fetching activities:', error);
-      setMessage('An error occurred while fetching activities.');
+  useEffect(() => {
+    if (user && isConnected) {
+      sendMessage(JSON.stringify({ type: 'fetchActivities', userId: user.email }));
     }
-  };
+  }, [user, isConnected, sendMessage]);
 
   useEffect(() => {
-    if (user) {
-      fetchActivities();
+    if (isConnected) {
+      const handleWebSocketMessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Received WebSocket message:', data);
+          if (data.type === 'activities') {
+            setActivities(data.activities);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+  
+      // Use the WebSocket instance directly instead of window.addEventListener
+      const ws = new WebSocket('ws://localhost:4000');
+      ws.onmessage = handleWebSocketMessage;
+  
+      return () => {
+        ws.close();
+      };
     }
-  }, [user]);
+  }, [isConnected]);
 
   const filterActivitiesByTimeframe = (activities, timeframe) => {
     const now = new Date();
@@ -109,8 +130,19 @@ function Dashboard() {
     });
   };
 
+  useEffect(() => {
+    if (user && isConnected) {
+      console.log('Sending fetchActivities message');
+      sendMessage(JSON.stringify({ type: 'fetchActivities', userId: user.email }));
+    }
+  }, [user, isConnected, sendMessage]);
+  
   const handleTimeframeChange = (newTimeframe) => {
     setTimeframe(newTimeframe);
+    if (isConnected && user) {
+      console.log('Sending updateTimeframe message');
+      sendMessage(JSON.stringify({ type: 'updateTimeframe', userId: user.email, timeframe: newTimeframe }));
+    }
   };
 
   const calculateTotalTimePerActivity = (filteredActivities) => {
