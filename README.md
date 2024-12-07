@@ -76,5 +76,8 @@ Below are rough sketches of the application's user interface:
 - **Existing User/Logout**: Stores activity data and user credentials for the same user if the user already exists. Allows users to logout taking them back to the login page. 
 - **Restricts Functionality**: You cannot log activities unless you have an account and have logged in.
 
-### WebSocket
-- **Real-Time Updates**: Use WebSockets to provide real-time updates for activity logs and analytics, ensuring users see live data changes.
+### WebSocket ✅
+- **Backend Listens for WebSocket Connection**: Done
+- **Frontend Makes WebSocket Connection**: Done
+- **Data Sent Over WebSocket Connection**: The activity data for the dashboard is sent through WebSocket.
+- **Real-Time Updates**: The WebSocket data is used to provide real-time updates for activity logs on the dashboard, ensuring users see live data changes.

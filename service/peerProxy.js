@@ -1,60 +1,78 @@
 const { WebSocketServer } = require('ws');
 const uuid = require('uuid');
+const DB = require('./database.js');
 
 function peerProxy(httpServer) {
-  // Create a websocket object
   const wss = new WebSocketServer({ noServer: true });
 
-  // Handle the protocol upgrade from HTTP to WebSocket
   httpServer.on('upgrade', (request, socket, head) => {
     wss.handleUpgrade(request, socket, head, function done(ws) {
       wss.emit('connection', ws, request);
     });
   });
 
-  // Keep track of all the connections so we can forward messages
   let connections = [];
 
   wss.on('connection', (ws) => {
+    console.log('New WebSocket connection established');
     const connection = { id: uuid.v4(), alive: true, ws: ws };
     connections.push(connection);
 
-    // Forward messages to everyone except the sender
-    ws.on('message', function message(data) {
-      connections.forEach((c) => {
-        if (c.id !== connection.id) {
-          c.ws.send(data);
+    ws.on('message', async function message(data) {
+      console.log('Raw message received:', data.toString());
+      try {
+        const message = JSON.parse(data);
+        console.log('Parsed message:', message);
+    
+        if (!message.type) {
+          console.error('Message type is undefined:', message);
+          return;
         }
-      });
+    
+        switch (message.type) {
+          case 'fetchActivities':
+            console.log('Fetching activities for user:', message.userId);
+            const activities = await DB.getActivities(message.userId);
+            console.log('Activities fetched:', activities);
+            ws.send(JSON.stringify({ type: 'activities', activities }));
+            break;
+          case 'updateTimeframe':
+            console.log(`Timeframe updated for user ${message.userId}: ${message.timeframe}`);
+            break;
+          default:
+            console.log('Unknown message type:', message.type);
+        }
+      } catch (error) {
+        console.error('Error processing message:', error);
+      }
     });
 
-    // Remove the closed connection so we don't try to forward anymore
     ws.on('close', () => {
-      const pos = connections.findIndex((o, i) => o.id === connection.id);
-
+      console.log('WebSocket connection closed');
+      const pos = connections.findIndex((o) => o.id === connection.id);
       if (pos >= 0) {
         connections.splice(pos, 1);
       }
     });
 
-    // Respond to pong messages by marking the connection alive
     ws.on('pong', () => {
       connection.alive = true;
     });
   });
 
-  // Keep active connections alive
   setInterval(() => {
     connections.forEach((c) => {
-      // Kill any connection that didn't respond to the ping last time
       if (!c.alive) {
+        console.log('Terminating inactive WebSocket connection');
         c.ws.terminate();
       } else {
         c.alive = false;
         c.ws.ping();
       }
     });
-  }, 10000);
+  }, 30000);
+
+  console.log('WebSocket server set up successfully');
 }
 
 module.exports = { peerProxy };
