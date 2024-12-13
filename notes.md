@@ -306,3 +306,207 @@ promise
     });
 - if success is true, the promise will resolve, and the .then() block will execute, logging "Promise resolved successfully!"
 - if success is false, the promise will reject, and the .catch() block will execute, logging "Promise was rejected."
+
+
+
+## Final Questions
+
+
+### What is the default port for HTTP/HTTPS/SSH? 
+Default Ports:
+- HTTP: Port 80
+- HTTPS: Port 443
+- SSH: Port 22
+
+### What does an HTTP status code in the range of 300/400/500 indicate?
+- 300-399: Redirection - Further action needs to be taken to complete the request
+- 400-499: Client errors - The request contains bad syntax or cannot be fulfilled
+- 500-599: Server errors - The server failed to fulfill a valid request
+
+### What does the HTTP header content-type allow you to do?
+- The content-type header allows you to specify the media type of the resouurce being sent in the HTTP response. It helps the browser understand how to process and display the content correctly.
+
+### What does a “Secure cookie”/”Http-only cookie”/”Same-site cookie” do? https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies
+- Secure cookie: Only sent to the server over HTTPS, helping prevent eavesdropping
+- http-only cookie: Cannot be accessed by client-side JavaScript, helping prevent cross-site scripting (XSS) attacks
+- Same-site cookie: Restricts how cookies are sent with cross-site requests, helping prevent cross-site request forgery (CSRF) attacks
+
+### Assuming the following Express middleware, what would be the console.log output for an HTTP GET request with a URL path of /api/document?
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+- console output: GET /api/document
+
+### Given the following Express service code: What does the following front end JavaScript that performs a fetch return?
+- a fetch operation typically returns a Promise that resolves to a Response object. The actual data returned depends on how you process the Response object.
+
+// Express service (backend)
+app.get('/api/data', (req, res) => {
+  res.json({ message: 'Hello from the server!', timestamp: Date.now() });
+});
+
+// Frontend fetch operation
+fetch('/api/data')
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    // Output: { message: 'Hello from the server!', timestamp: 1639344000000 }
+  })
+  .catch(error => console.error('Error:', error));
+
+
+### Given the following MongoDB query, select all of the matching documents {name:Mark}
+- this query will select all documents in the collection where the "name" field exactly matches "Mark" It's case-sensitive and will return multiple documents if more than one matches the criteria
+
+### How should user passwords be stored?
+- Never in plain text
+- include a unique salt for each password
+- use a strong, one-way hashing algorith (e.g., bcrypt, Argon2)
+- implement password complexity requirements
+- use HTTPS for all authentication requests
+
+### Assuming the following node.js websocket code in the back end, and the following front end websocket code, what will the front end log to the console?
+- The frontend console log would typically show messages received from the server, connection status updates, or any custom logging implemented in the WebSocket event handlers
+
+Backend (Node.js)
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 8080 });
+
+wss.on('connection', function connection(ws) {
+  console.log('New client connected');
+  
+  ws.send('Welcome to the WebSocket server!');
+
+  ws.on('message', function incoming(message) {
+    console.log('Received:', message);
+    ws.send(`Server received: ${message}`);
+  });
+});
+
+Frontend (JavaScript)
+const socket = new WebSocket('ws://localhost:8080');
+
+socket.addEventListener('open', function (event) {
+  console.log('Connected to WebSocket server');
+  socket.send('Hello, server!');
+});
+
+socket.addEventListener('message', function (event) {
+  console.log('Message from server:', event.data);
+});
+
+socket.addEventListener('close', function (event) {
+  console.log('Disconnected from WebSocket server');
+});
+
+console log output:
+Connected to WebSocket server
+Message from server: Welcome to the WebSocket server!
+Message from server: Server received: Hello, server!
+
+
+### What is the websocket protocol intended to provide?
+- Full-duplex, bidirectional communication
+- Real-time data exchange between client and server
+- Persistent connection, reducing overhead of repeated HTTP requests
+- Lower latency compared to traditional polling methods
+- Efficient for applications requiring frequent, small data update (e.g., chat apps, live feeds)
+
+### What do the following acronyms stand for? JSX, JS, AWS, NPM, NVM
+- JSX: JavaScript XML
+- JS: JavaScript
+- AWS: Amazon Web Services
+- NPM: Node Package Manager
+- NVM: Node Version Manager
+
+### Assuming an HTML document with a body element. What text content will the following React component generate?  The react component will use parameters.
+example: 
+
+function Greeting({ name }) {
+  return <h1>Hello, {name}!</h1>;
+}
+
+function App() {
+  return (
+    <div>
+      <Greeting name="Alice" />
+      <Greeting name="Bob" />
+    </div>
+  );
+}
+
+In this example:
+1. The Greeting component accepts a name prop.
+2. It uses this prop to generate a personalized greeting.
+3. The App component renders two Greeting components with different name props.
+The resulting text content in the HTML body would be:
+
+Hello, Alice!
+Hello, Bob!
+
+This demonstrates how React components can use parameters (props) to generate dynamic content. The actual output would depend on the specific component implementation and the props passed to it.
+
+### Given a set of React components that include each other, what will be generated
+- When React components include each other, they create a component tree. The parent component will render its child components, and those child components may render their own children. This creates a hierarchical structure of components that ultimately generates the final DOM structure.
+
+### What does a React component with React.useState do?
+- allows functional components to manage state. it returns an array with two elements:
+1. the current state value
+2. a function to update that state value
+- this enables components to have dynamic, changeable data without needing to convert to a class component
+
+### What are React Hooks used for?
+React hooks are used to:
+- add state to functional components
+- manage side effects in functional components
+- reuse stateful logic across components
+- access context in functional components
+optimize performance in functional components
+
+### What does the State Hook/Context Hook/Ref Hook/Effect Hook/Performance Hook do? https://react.dev/reference/react/hooks
+- State Hook (useState): Allows functional components to manage local state.
+- Context Hook (useContext): Provides a way to consume context in functional components without nesting.
+- Ref Hook(useRef): Creates a mutable reference that persists across re-renders.
+- Effect Hook (useEffect): Manages side effects in functional components, such as data fetching, subscriptions, or DOM manipulation
+- Performance Hook (useMemo, useCallback): Optimize performance by memorizing values and callbacks to prevent unnecessary re-renders.
+
+### Given React Router code, select statements that are true.
+React Router:
+- enables navigation among views in a react application
+- allows for dynamic routing
+- synchronizes the UI with the URL
+- provides a way to nest route definitions
+
+### What does the package.json file do?
+- defines the project's dependencies and their versions
+- contains metadata about the project
+- defines scripts for running various tasks
+- can verify the entry point of the application
+- is used by npm to manage the project's dependencies
+
+### What does the fetch function do?
+- modern API for making HTTP requests in JavaScript
+- returns a promise that resolves to the response object representing the response to the request
+- can be used ot make GET, POST, PUT, DELETE, and other types of HTTP requests
+- provides a more powerful and flexible feature set compared to older XMLHttpRequest
+
+### What does node.js do?
+- allows running javascript on the server-side
+- provides an event driven non blocking I/O model that makes it lightweight and efficient
+- includes a rich ecosystem of packages through npm (NodePackageManager)
+- enables building scalable network applications
+
+### What does pm2 do?
+- process manager for node.js applications
+- allows keeping applications alive forever
+- reloads applications without downtime
+- facilitates common system admin tasks
+- manages application logging, monitoring, and clustering
+
+### What does Vite do?
+- build tool that aims to provide a faster a leaner development experience for modern web projects
+- uses native ES modules to serve code, resulting in extremely fast hot module replacement (HMR)
+- provides a lightning fast cold server start
+- optimizes builds for production using rollup
+- supports typescript, JSX, CSS, and more out of the box
